@@ -69,32 +69,35 @@ public class NetworkClock extends Clock {
     }
 
     public void reloadInterface() {
-        Debug.println(makeDebugStr("A"), EventSeverity.WARNING, true);
+        if (protocol.equals(Protocol.UDP)) System.out.println("A");
         PacketCounters.get(remote, protocol).reset();
         if (DisplayEndpoint.UPDATER != null) {
-            Debug.println(makeDebugStr("B"), EventSeverity.WARNING, true);
+            if (protocol.equals(Protocol.UDP)) System.out.println("B");
             DisplayEndpoint.UPDATER.update(ParserNull.getInstance(), remote, protocol);
         }
         if (iface != null) {
-            Debug.println(makeDebugStr("C"), EventSeverity.WARNING, true);
+            if (protocol.equals(Protocol.UDP)) System.out.println("C");
             Debug.removeSticky(remote + " " + protocol + " interface connected to " + iface);
             iface.close();
             iface = null;
         }
         boolean isFms = remote == Remote.FMS;
         if (isFms && !MainJDEC.FMS_CONNECT.isSelected()) {
-            Debug.println(makeDebugStr("D"), EventSeverity.WARNING, true);
+            if (protocol.equals(Protocol.UDP)) System.out.println("D");
             DisplayEndpoint.NET_IF_INIT.set(false, remote, protocol);
             return;
         }
-        Debug.println(makeDebugStr("E"), EventSeverity.WARNING, true);
+        if (protocol.equals(Protocol.UDP)) System.out.println("E");
         try {
+            if (protocol.equals(Protocol.UDP)) System.out.println("F");
             String ip = isFms
                     ? AddressConstants.FMS_IP
                     : AddressConstants.getRioAddress();
+            if (protocol.equals(Protocol.UDP)) System.out.println("G " + ip + " " + isFms);
             boolean reachable = exceptionPingTest(ip);
+            if (protocol.equals(Protocol.UDP)) System.out.println("H " + reachable);
             if (!reachable) {
-                Debug.println(makeDebugStr("F"), EventSeverity.WARNING, true);
+                if (protocol.equals(Protocol.UDP)) System.out.println("I");
                 uninitialize(isFms);
                 return;
             }
@@ -102,13 +105,15 @@ public class NetworkClock extends Clock {
             PortTriple ports = isFms
                     ? AddressConstants.getFMSPorts()
                     : AddressConstants.getRioPorts();
+            if (protocol.equals(Protocol.UDP)) System.out.println("J " + ports);
             iface = protocol == Protocol.TCP
                     ? new TCPInterface(ip, ports.getTcp())
                     : new UDPInterface(ip, ports.getUdpClient(), ports.getUdpServer());
+            if (protocol.equals(Protocol.UDP)) System.out.println("K " + iface.toString());
             DisplayEndpoint.NET_IF_INIT.set(true, remote, protocol);
-            Debug.println(makeDebugStr("H"), EventSeverity.WARNING, true);
+            if (protocol.equals(Protocol.UDP)) System.out.println("L");
         } catch (IOException e) {
-            Debug.println(makeDebugStr("I"), EventSeverity.WARNING, true);
+            if (protocol.equals(Protocol.UDP)) System.out.println("M " + e.getMessage());
             uninitialize(isFms);
         }
     }

@@ -34,7 +34,7 @@ public class NetworkClock extends Clock {
             if (connFms) {
                 if (DisplayEndpoint.NET_IF_INIT.get(remote, protocol)) {
                     if (!iface.write(DisplayEndpoint.CREATOR.create(remote, protocol))) {
-                        Debug.println(makeDebugStr("network error"), EventSeverity.WARNING, true);
+                        Debug.println(makeDebugStr("network error 1"), EventSeverity.WARNING, true);
                         DisplayEndpoint.UPDATER.update(ParserNull.getInstance(), remote, protocol);
                         reloadInterface();
                     } else {
@@ -47,12 +47,12 @@ public class NetworkClock extends Clock {
                             PacketParser packetParser = DisplayEndpoint.getPacketParser(remote, protocol, data);
                             DisplayEndpoint.UPDATER.update(packetParser, remote, protocol);
                             Debug.println(remote + " " + protocol + " interface connected to " + iface.toString(), EventSeverity.INFO, true);
-                            Debug.removeSticky(makeDebugStr("network error"));
+                            Debug.removeSticky(makeDebugStr("network error 2"));
                             Debug.removeSticky(makeDebugStr("invalid data"));
                         }
                     }
                 } else {
-                    Debug.println(makeDebugStr("network error"), EventSeverity.WARNING, true);
+                    Debug.println(makeDebugStr("network error 3"), EventSeverity.WARNING, true);
                     DisplayEndpoint.UPDATER.update(ParserNull.getInstance(), remote, protocol);
                     reloadInterface();
                 }
@@ -69,29 +69,36 @@ public class NetworkClock extends Clock {
     }
 
     public void reloadInterface() {
+        Debug.println(makeDebugStr("A"), EventSeverity.WARNING, true);
         PacketCounters.get(remote, protocol).reset();
         if (DisplayEndpoint.UPDATER != null) {
+            Debug.println(makeDebugStr("B"), EventSeverity.WARNING, true);
             DisplayEndpoint.UPDATER.update(ParserNull.getInstance(), remote, protocol);
         }
         if (iface != null) {
+            Debug.println(makeDebugStr("C"), EventSeverity.WARNING, true);
             Debug.removeSticky(remote + " " + protocol + " interface connected to " + iface);
             iface.close();
             iface = null;
         }
         boolean isFms = remote == Remote.FMS;
         if (isFms && !MainJDEC.FMS_CONNECT.isSelected()) {
+            Debug.println(makeDebugStr("D"), EventSeverity.WARNING, true);
             DisplayEndpoint.NET_IF_INIT.set(false, remote, protocol);
             return;
         }
+        Debug.println(makeDebugStr("E"), EventSeverity.WARNING, true);
         try {
             String ip = isFms
                     ? AddressConstants.FMS_IP
                     : AddressConstants.getRioAddress();
             boolean reachable = exceptionPingTest(ip);
             if (!reachable) {
+                Debug.println(makeDebugStr("F"), EventSeverity.WARNING, true);
                 uninitialize(isFms);
                 return;
             }
+            Debug.println(makeDebugStr("G"), EventSeverity.WARNING, true);
             PortTriple ports = isFms
                     ? AddressConstants.getFMSPorts()
                     : AddressConstants.getRioPorts();
@@ -99,7 +106,9 @@ public class NetworkClock extends Clock {
                     ? new TCPInterface(ip, ports.getTcp())
                     : new UDPInterface(ip, ports.getUdpClient(), ports.getUdpServer());
             DisplayEndpoint.NET_IF_INIT.set(true, remote, protocol);
+            Debug.println(makeDebugStr("H"), EventSeverity.WARNING, true);
         } catch (IOException e) {
+            Debug.println(makeDebugStr("I"), EventSeverity.WARNING, true);
             uninitialize(isFms);
         }
     }
@@ -112,8 +121,10 @@ public class NetworkClock extends Clock {
     }
 
     private void uninitialize(boolean isFms) {
+        Debug.println(makeDebugStr("J"), EventSeverity.WARNING, true);
         DisplayEndpoint.NET_IF_INIT.set(false, remote, protocol);
         if (!isFms) {
+            Debug.println(makeDebugStr("K"), EventSeverity.WARNING, true);
             MainJDEC.IS_ENABLED.setEnabled(false);
             if (MainJDEC.IS_ENABLED.isSelected()) {
                 MainJDEC.IS_ENABLED.setSelected(false);
